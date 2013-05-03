@@ -1,0 +1,11 @@
+Simulates forest fires with cellular automata
+
+main java file is Controller.java
+
+you will need gnuplot installed
+
+run with:
+
+java Controller | gnuplot -persist
+
+you can control with the buttons that come up in a little java window
