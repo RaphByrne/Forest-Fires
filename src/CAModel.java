@@ -25,6 +25,7 @@ public class CAModel {
 	int[][] lattice;
 	int width, height;
 	double growthrate;
+	double lighteningChance;
 	private final int[][] moore = {{0,0},{0,1},{1,1},{1,0},{0,-1},{-1,-1},{-1,0},{1,-1},{-1,1}};
 	
 	/**
@@ -37,6 +38,7 @@ public class CAModel {
 		this.width = width;
 		this.height = height;
 		this.growthrate = growthrate;
+		this.lighteningChance = 0;
 		lattice = new int[width][height];
 		for(int i = 0; i < width; i++)
 			for(int j = 0; j < width; j++)
@@ -52,6 +54,31 @@ public class CAModel {
 		}
 	}
 	
+	/**
+	 * Makes a new model to the spec of the assignment
+	 * @param width
+	 * @param height
+	 * @param q
+	 * @param growthrate
+	 */
+	public CAModel(int width, int height, double q, double growthrate, double lighteningChance) {
+		this.width = width;
+		this.height = height;
+		this.growthrate = growthrate;
+		this.lighteningChance = lighteningChance;
+		lattice = new int[width][height];
+		long seed = System.currentTimeMillis();
+		Random rand = new Random(seed);
+		for(int i = 0; i < width; i++)
+			for(int j = 0; j < width; j++)
+				if(rand.nextDouble() < q)
+					lattice[i][j] = States.TREE.index;
+				else
+					lattice[i][j] = States.EMPTY.index;
+	}
+		
+		
+	
 	public CAModel(int[][] lattice, double growthrate) {
 		this.lattice = latticeClone(lattice);
 		this.width = lattice.length;
@@ -61,21 +88,32 @@ public class CAModel {
 	
 	public void step() {
 		Random rand = new Random(System.currentTimeMillis());
+		int[][] nextLattice = new int[width][height];
 		for(int i = 0; i < width; i++)
 			for(int j = 0; j < height; j++) {
 				if(lattice[i][j] == States.ONFIRE.index) //FIRE -> EMPTY
-					lattice[i][j] = States.EMPTY.index;
-				else if(lattice[i][j] == States.TREE.index){ //TREE -> FIRE if at least one fire in neighbourhood
+					nextLattice[i][j] = States.EMPTY.index;
+				else if(lattice[i][j] == States.TREE.index){ //TREE -> FIRE if at least one fire in neighbourhood or randomly
 					//here I'm assuming Moore neighbourhoods
+					boolean onfire = false;
 					for(Integer x : getNeighbourhood(lattice, i , j, moore)) {
 						if(x == States.ONFIRE.index)
-							lattice[i][j] = States.ONFIRE.index;
+							onfire = true;
 					}
+					if(rand.nextDouble() < lighteningChance)
+						onfire = true;
+					if(onfire)
+						nextLattice[i][j] = States.ONFIRE.index;
+					else
+						nextLattice[i][j] = States.TREE.index;
 				} else if(lattice[i][j] == States.EMPTY.index) { //EMPTY -> TREE with probability p
 					if(rand.nextDouble() < growthrate)
-						lattice[i][j] = States.TREE.index;
+						nextLattice[i][j] = States.TREE.index;
+					else
+						nextLattice[i][j] = States.EMPTY.index;
 				}
 			}
+		lattice = nextLattice;
 	}
 	
 	/**
@@ -122,6 +160,25 @@ public class CAModel {
 			
 		}
 		setFire(x, y);
+	}
+	
+	/**
+	 * Sets fire to any trees within a circle around a given point
+	 * 
+	 * It's really inefficient but you only run it once at a time so who cares
+	 * @param radius
+	 * @param centre
+	 */
+	public void setFireCircle(int radius, int x, int y) {
+		for(int i = 0; i < width; i++)
+			for(int j = 0; j < height; j++) {
+				if(Math.sqrt((i - x)*(i-x) + (j - y)*(j-y)) < radius)
+					setFire(i,j);
+			}
+	}
+	
+	public void setFireCentre() {
+		setFireCircle(Math.min(width/50, height/50),width/2,height/2);		
 	}
 	
 	public CAModel clone() {

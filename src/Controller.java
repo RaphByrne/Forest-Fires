@@ -12,7 +12,8 @@ import com.sun.media.sound.ModelAbstractChannelMixer;
 public class Controller extends JFrame implements ActionListener{
 
 	static boolean doPlay = false;
-	private JButton playButton, stopButton, resetButton, stepButton, randFireButton;
+	private JButton playButton, stopButton, resetButton, stepButton, randFireButton,
+	centreFireButton;
 	private PlotTask plotter;
 	private CAModel originalModel;
 	
@@ -27,6 +28,7 @@ public class Controller extends JFrame implements ActionListener{
 		resetButton = makeButton("RESET");
 		stepButton = makeButton("STEP");
 		randFireButton = makeButton("RANDOM FIRE");
+		centreFireButton = makeButton("SET FIRE AT CENTRE");
 		
 		
 		JPanel commandPanel = new JPanel();
@@ -35,6 +37,7 @@ public class Controller extends JFrame implements ActionListener{
 		commandPanel.add(resetButton);
 		commandPanel.add(stepButton);
 		commandPanel.add(randFireButton);
+		commandPanel.add(centreFireButton);
 		
 		
 		getContentPane().add(commandPanel);
@@ -78,6 +81,9 @@ public class Controller extends JFrame implements ActionListener{
 			printLattice(plotter.model.lattice);
 		} else if(e.getActionCommand() == "RANDOM FIRE") {
 			plotter.model.setRandomFire();
+			printLattice(plotter.model.lattice);
+		} else if(e.getActionCommand() == "SET FIRE AT CENTRE") {
+			plotter.model.setFireCentre();
 			printLattice(plotter.model.lattice);
 		}
 	}
@@ -123,7 +129,13 @@ public class Controller extends JFrame implements ActionListener{
 		"set size ratio 1",
 		"set cbrange [0:3]",
 		"set palette model RGB defined (0 'black', 0.99 'black', 1 'green', 1.99 'green', 2 'red', 2.99 'red')",
-		"set tics (\"empty\" 0, \"tree\" 1, \"fire\" 2) offset 0 2"
+		"set cbtics (\"empty\" 0, \"tree\" 1, \"fire\" 2) offset 0 2",
+		"set key at graph 1,1 bottom Right reverse",
+		"set xtics out -200,10,200",
+		"set ytics out -200,10,200",
+		"set x2tics -200.5,1,200.5 format \"\"",
+		"set y2tics -200.5,1,200.5 format \"\"",
+		"set grid noxtics noytics x2tics y2tics front linetype -1"
 	};
 	
 	private static void initGnuplot() {
@@ -132,7 +144,7 @@ public class Controller extends JFrame implements ActionListener{
 	}
 
 	public static void main(String[] args) {
-		CAModel model = new CAModel(200,200,1000, 0.001);
+		CAModel model = new CAModel(200,200,0.1, 0, 0);
 		Controller c = new Controller(model);
 		initGnuplot();
 		printLattice(model.lattice);
