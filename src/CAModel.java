@@ -79,11 +79,12 @@ public class CAModel {
 		
 		
 	
-	public CAModel(int[][] lattice, double growthrate) {
+	public CAModel(int[][] lattice, double growthrate, double lighteningChance) {
 		this.lattice = latticeClone(lattice);
 		this.width = lattice.length;
 		this.height = lattice[0].length;
 		this.growthrate = growthrate;
+		this.lighteningChance = lighteningChance;
 	}
 	
 	public void step() {
@@ -182,7 +183,7 @@ public class CAModel {
 	}
 	
 	public CAModel clone() {
-		return new CAModel(lattice, growthrate);
+		return new CAModel(lattice, growthrate, lighteningChance);
 	}
 	
 	public static int[][] latticeClone(int[][] lattice) {
