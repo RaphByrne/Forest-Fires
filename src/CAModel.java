@@ -14,6 +14,9 @@ public class CAModel {
 	double growthrate;
 	double lighteningChance;
 	private final int[][] moore = {{0,0},{0,1},{1,1},{1,0},{0,-1},{-1,-1},{-1,0},{1,-1},{-1,1}};
+	int numTrees = 0;
+	int numFires = 0;
+	int numEmpty = 0;
 	
 	/**
 	 * Makes makes an initial random configuration
@@ -36,9 +39,12 @@ public class CAModel {
 		for(int i = 0; i < numtrees; i++) {
 			int x = rand.nextInt(width);
 			int y = rand.nextInt(height);
-			if(lattice[x][y] != TREE)
-				lattice[x][y] = TREE; //could double up on certain cells but it doesn't really matter
+			if(lattice[x][y] != TREE) {
+				lattice[x][y] = TREE;
+			}
 		}
+		numTrees = numtrees;
+		numEmpty = width*height - numTrees;
 	}
 	
 	/**
@@ -59,10 +65,13 @@ public class CAModel {
 		Random rand = new Random(seed);
 		for(int i = 0; i < width; i++)
 			for(int j = 0; j < width; j++)
-				if(rand.nextDouble() < q)
+				if(rand.nextDouble() < q) {
 					lattice[i][j] = TREE;
+					numTrees++;
+				}
 				else
 					lattice[i][j] = EMPTY;
+		numEmpty = width*height - numTrees;
 	}
 		
 		
@@ -93,9 +102,10 @@ public class CAModel {
 		int[][] nextLattice = new int[width][height];
 		for(int i = 0; i < width; i++)
 			for(int j = 0; j < height; j++) {
-				if(lattice[i][j] == ONFIRE) //FIRE -> EMPTY
+				if(lattice[i][j] == ONFIRE) { //FIRE -> EMPTY
 					nextLattice[i][j] = EMPTY;
-				else if(lattice[i][j] == TREE){ //TREE -> FIRE if at least one fire in neighbourhood or randomly
+					numFires--;
+				} else if(lattice[i][j] == TREE){ //TREE -> FIRE if at least one fire in neighbourhood or randomly
 					//here I'm assuming Moore neighbourhoods
 					boolean onfire = false;
 					for(Integer x : getNeighbourhood(lattice, i , j, moore)) {
@@ -104,18 +114,22 @@ public class CAModel {
 					}
 					if(rand.nextDouble() < lighteningChance)
 						onfire = true;
-					if(onfire)
+					if(onfire) {
 						nextLattice[i][j] = ONFIRE;
-					else
+						numFires++;
+						numTrees--;
+					} else
 						nextLattice[i][j] = TREE;
 				} else if(lattice[i][j] == EMPTY) { //EMPTY -> TREE with probability p
-					if(rand.nextDouble() < growthrate)
+					if(rand.nextDouble() < growthrate) {
 						nextLattice[i][j] = TREE;
-					else
+						numTrees++;
+					} else
 						nextLattice[i][j] = EMPTY;
 				}
 			}
 		lattice = nextLattice;
+		numEmpty = width*height - numTrees - numFires;
 	}
 	
 	/**
@@ -138,6 +152,8 @@ public class CAModel {
 	/**
  	* Makes a random change to the lattice, mostly used in initial development to
  	* generate random models
+ 	*
+ 	* IMPORTANT, DOESN'T UPDATE TREE/FIRE COUNTS
  	*/ 
 	public void randomChange() {
 		long seed = System.currentTimeMillis();
@@ -157,6 +173,8 @@ public class CAModel {
 		if(i > 0 && i < width && j  > 0 && j < height)
 			if(lattice[i][j] == TREE) {
 				lattice[i][j] = ONFIRE;
+				numTrees--;
+				numFires++;
 				return true;
 			}
 		return false;
