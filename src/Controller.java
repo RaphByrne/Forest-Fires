@@ -6,8 +6,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
-import com.sun.media.sound.ModelAbstractChannelMixer;
-
 
 public class Controller extends JFrame implements ActionListener{
 

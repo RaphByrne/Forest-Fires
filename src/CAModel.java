@@ -7,20 +7,7 @@ public class CAModel {
 
 	
 	
-	public enum States {
-		EMPTY (0),
-		TREE (1), 
-		ONFIRE(2);
-	
-		private final int index;
-		States(int index) {
-			this.index = index;
-		}
-		
-		public int index() {
-			return index;
-		}
-	};
+	private final static int EMPTY = 0, TREE = 1, ONFIRE = 2;
 	
 	int[][] lattice;
 	int width, height;
@@ -42,15 +29,15 @@ public class CAModel {
 		lattice = new int[width][height];
 		for(int i = 0; i < width; i++)
 			for(int j = 0; j < width; j++)
-				lattice[i][j] = States.EMPTY.index;
+				lattice[i][j] = EMPTY;
 		
 		long seed = System.currentTimeMillis();
 		Random rand = new Random(seed);
 		for(int i = 0; i < numtrees; i++) {
 			int x = rand.nextInt(width);
 			int y = rand.nextInt(height);
-			if(lattice[x][y] != States.TREE.index)
-				lattice[x][y] = States.TREE.index; //could double up on certain cells but it doesn't really matter
+			if(lattice[x][y] != TREE)
+				lattice[x][y] = TREE; //could double up on certain cells but it doesn't really matter
 		}
 	}
 	
@@ -72,9 +59,9 @@ public class CAModel {
 		for(int i = 0; i < width; i++)
 			for(int j = 0; j < width; j++)
 				if(rand.nextDouble() < q)
-					lattice[i][j] = States.TREE.index;
+					lattice[i][j] = TREE;
 				else
-					lattice[i][j] = States.EMPTY.index;
+					lattice[i][j] = EMPTY;
 	}
 		
 		
@@ -92,26 +79,26 @@ public class CAModel {
 		int[][] nextLattice = new int[width][height];
 		for(int i = 0; i < width; i++)
 			for(int j = 0; j < height; j++) {
-				if(lattice[i][j] == States.ONFIRE.index) //FIRE -> EMPTY
-					nextLattice[i][j] = States.EMPTY.index;
-				else if(lattice[i][j] == States.TREE.index){ //TREE -> FIRE if at least one fire in neighbourhood or randomly
+				if(lattice[i][j] == ONFIRE) //FIRE -> EMPTY
+					nextLattice[i][j] = EMPTY;
+				else if(lattice[i][j] == TREE){ //TREE -> FIRE if at least one fire in neighbourhood or randomly
 					//here I'm assuming Moore neighbourhoods
 					boolean onfire = false;
 					for(Integer x : getNeighbourhood(lattice, i , j, moore)) {
-						if(x == States.ONFIRE.index)
+						if(x == ONFIRE)
 							onfire = true;
 					}
 					if(rand.nextDouble() < lighteningChance)
 						onfire = true;
 					if(onfire)
-						nextLattice[i][j] = States.ONFIRE.index;
+						nextLattice[i][j] = ONFIRE;
 					else
-						nextLattice[i][j] = States.TREE.index;
-				} else if(lattice[i][j] == States.EMPTY.index) { //EMPTY -> TREE with probability p
+						nextLattice[i][j] = TREE;
+				} else if(lattice[i][j] == EMPTY) { //EMPTY -> TREE with probability p
 					if(rand.nextDouble() < growthrate)
-						nextLattice[i][j] = States.TREE.index;
+						nextLattice[i][j] = TREE;
 					else
-						nextLattice[i][j] = States.EMPTY.index;
+						nextLattice[i][j] = EMPTY;
 				}
 			}
 		lattice = nextLattice;
@@ -144,8 +131,8 @@ public class CAModel {
 	
 	public boolean setFire(int i, int j) {
 		if(i > 0 && i < width && j  > 0 && j < height)
-			if(lattice[i][j] == States.TREE.index) {
-				lattice[i][j] = States.ONFIRE.index;
+			if(lattice[i][j] == TREE) {
+				lattice[i][j] = ONFIRE;
 				return true;
 			}
 		return false;
@@ -155,7 +142,7 @@ public class CAModel {
 		Random rand = new Random(System.currentTimeMillis());
 		int x = rand.nextInt(width);
 		int y = rand.nextInt(height);
-		while(lattice[x][y] != States.TREE.index) {
+		while(lattice[x][y] != TREE) {
 			x = rand.nextInt(width);
 			y = rand.nextInt(height);
 			
