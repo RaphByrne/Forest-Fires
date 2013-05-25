@@ -43,10 +43,11 @@ public class CAModel {
 	
 	/**
 	 * Makes a new model to the spec of the assignment
-	 * @param width
-	 * @param height
-	 * @param q
-	 * @param growthrate
+	 * @param width the width of the lattice
+	 * @param height the hieght of the lattice
+	 * @param q the probably that a cell will intially contain a tree
+	 * @param growthrate the probably that a new tree will grow in an empty cell
+	 * @param lighteningChance probably of a tree catching fire
 	 */
 	public CAModel(int width, int height, double q, double growthrate, double lighteningChance) {
 		this.width = width;
@@ -65,7 +66,15 @@ public class CAModel {
 	}
 		
 		
-	
+
+	/**
+ 	* Makes a model from an existing lattice
+ 	*
+ 	* @param lattice the lattice, a full clone is made
+ 	* @param growthrate
+ 	* @param lighteningChance
+ 	*
+ 	*/ 	
 	public CAModel(int[][] lattice, double growthrate, double lighteningChance) {
 		this.lattice = latticeClone(lattice);
 		this.width = lattice.length;
@@ -73,7 +82,12 @@ public class CAModel {
 		this.growthrate = growthrate;
 		this.lighteningChance = lighteningChance;
 	}
-	
+
+
+	/**
+ 	* Performs one iteration of the model
+ 	*
+ 	*/ 	
 	public void step() {
 		Random rand = new Random(System.currentTimeMillis());
 		int[][] nextLattice = new int[width][height];
@@ -106,7 +120,7 @@ public class CAModel {
 	
 	/**
 	 * Gets the contents of the neighbourhood cells of a point (i,j) from the lattice 
-	 * using the neighbour direction vectors dirs
+	 * using the neighbourhood direction vectors dirs
 	 * @param dirs
 	 * @return
 	 */
@@ -121,6 +135,10 @@ public class CAModel {
 		return a;
 	}
 	
+	/**
+ 	* Makes a random change to the lattice, mostly used in initial development to
+ 	* generate random models
+ 	*/ 
 	public void randomChange() {
 		long seed = System.currentTimeMillis();
 		Random rand = new Random(seed);
@@ -129,6 +147,12 @@ public class CAModel {
 				lattice[i][j] = rand.nextInt(3);
 	}
 	
+	/**
+ 	* Sets a particular cell on fire
+ 	* @param i the x co-ord
+ 	* @param j the y co-ord
+ 	* @return true if the cell was previously not on fire and now is
+ 	*/ 
 	public boolean setFire(int i, int j) {
 		if(i > 0 && i < width && j  > 0 && j < height)
 			if(lattice[i][j] == TREE) {
@@ -138,6 +162,9 @@ public class CAModel {
 		return false;
 	}
 	
+	/**
+ 	* Sets a random cell on fire
+ 	*/	 
 	public void setRandomFire() {
 		Random rand = new Random(System.currentTimeMillis());
 		int x = rand.nextInt(width);
@@ -153,7 +180,7 @@ public class CAModel {
 	/**
 	 * Sets fire to any trees within a circle around a given point
 	 * 
-	 * It's really inefficient but you only run it once at a time so who cares
+	 * It's kinda inefficient but you only run it once at a time so who cares
 	 * @param radius
 	 * @param centre
 	 */
@@ -165,14 +192,25 @@ public class CAModel {
 			}
 	}
 	
+	/**
+ 	* Sets fire to a small circle in the middle of the lattice
+ 	*/ 
 	public void setFireCentre() {
 		setFireCircle(Math.min(width/50, height/50),width/2,height/2);		
 	}
 	
+	/**
+ 	* Does a full clone of an existing model
+ 	*/ 
 	public CAModel clone() {
 		return new CAModel(lattice, growthrate, lighteningChance);
 	}
 	
+	/**
+ 	* Array cloning helper function
+ 	* @param lattice the array to clone
+ 	* @return a clone of lattice
+ 	*/ 
 	public static int[][] latticeClone(int[][] lattice) {
 		int[][] out = new int[lattice.length][lattice[0].length];
 		for(int i = 0; i < lattice.length; i++)

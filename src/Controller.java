@@ -15,11 +15,17 @@ public class Controller extends JFrame implements ActionListener{
 	private PlotTask plotter;
 	private CAModel originalModel;
 	
+	/**
+ 	* Makes a new controller from an existing model
+ 	* @param model the model to control
+ 	*/ 
 	public Controller(CAModel model){		
 		
 		originalModel = model.clone();
 		plotter = new PlotTask(model);
 		
+		//SWING BULLCRAP BELOW
+		//set up al the buttons
 		playButton = makeButton("PLAY");
 		stopButton = makeButton("STOP");
 		stopButton.setEnabled(false);
@@ -28,7 +34,7 @@ public class Controller extends JFrame implements ActionListener{
 		randFireButton = makeButton("RANDOM FIRE");
 		centreFireButton = makeButton("SET FIRE AT CENTRE");
 		
-		
+		//put everything in a panel
 		JPanel commandPanel = new JPanel();
 		commandPanel.add(playButton);
 		commandPanel.add(stopButton);
@@ -37,25 +43,30 @@ public class Controller extends JFrame implements ActionListener{
 		commandPanel.add(randFireButton);
 		commandPanel.add(centreFireButton);
 		
-		
+		//more swing BS
 		getContentPane().add(commandPanel);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 		pack();
 	}
 	
+	/**
+ 	* Helper function for button making
+ 	*/ 
 	private JButton makeButton(String caption) {
 		JButton button = new JButton();
 		button.setText(caption);
 		button.setSize(new Dimension(100,50));
-		button.addActionListener(this);
+		button.addActionListener(this); //makes actionPerformed work
 		//getContentPane().add(button);
 		return button;
 	}
-	
+
+	/**
+ 	* Captures the button actions and calls model methods
+ 	*/ 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
 		if(e.getActionCommand() == "PLAY") {
 			playButton.setEnabled(false);
 			stopButton.setEnabled(true);
@@ -87,6 +98,9 @@ public class Controller extends JFrame implements ActionListener{
 	}
 	
 	
+	/**
+ 	* Required to have a task run in the background and still respond to swing GUI events
+ 	*/ 
 	private class PlotTask extends SwingWorker<Void, CAModel> {
 
 		CAModel model;
