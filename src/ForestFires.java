@@ -1,13 +1,24 @@
-public class Experiment {
+/**
+ * Starter class for running the forest fires experiment
+ */
+public class ForestFires {
 
 	private static void printStats(CAModel model) {
 		System.out.println(model.numEmpty + " " + model.numTrees + " " + model.numFires);
 	}
 
+	/**
+ 	* Runs the model for a number of iterations, prints data to standard out in form:
+ 	* iteration_num modelStats
+ 	*
+ 	* @param model the model
+ 	* @param numIter the number of iterations to run
+ 	*/
 	private static void run(CAModel model, int numIter) {
 		printStats(model);
-		for(int i = 0; i < numIter; i++) {
+		for(int i = 1; i <= numIter; i++) {
 			model.step();
+			System.out.print(i + " ");
 			printStats(model);
 		}
 	}	

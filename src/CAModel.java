@@ -11,6 +11,7 @@ public class CAModel {
 	
 	int[][] lattice;
 	int width, height;
+	double q = 0;
 	double growthrate;
 	double lighteningChance;
 	private final int[][] moore = {{0,0},{0,1},{1,1},{1,0},{0,-1},{-1,-1},{-1,0},{1,-1},{-1,1}};
@@ -60,6 +61,7 @@ public class CAModel {
 		this.height = height;
 		this.growthrate = growthrate;
 		this.lighteningChance = lighteningChance;
+		this.q = q;
 		lattice = new int[width][height];
 		long seed = System.currentTimeMillis();
 		Random rand = new Random(seed);
