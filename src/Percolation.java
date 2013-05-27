@@ -14,18 +14,20 @@ public class Percolation {
  	* @param model the model
  	* @param numIter the number of iterations to run
  	*/
-	private static void run(CAModel model, int numIter) {
+	private static void run(CAModel model) {
 		System.out.print(model.q + " ");
 		model.setFireCentre();
-		for(int i = 1; i <= numIter; i++) {
+		int i = 0;
+		while(model.numFires > 0) {
 			model.step();
+			i++;
 		}
-		printStats(model);
+		System.out.println(i);
 	}	
 
 	public static void main(String[] args) {
-		if(args.length < 3) {
-			System.out.println("Arguments are: width height num_iterations");
+		if(args.length < 2) {
+			System.out.println("Arguments are: width height");
 			System.exit(0);
 		}
 		
@@ -34,11 +36,10 @@ public class Percolation {
 		int height = Integer.parseInt(args[1]);
 		double growth = 0;
 		double firechance = 0;
-		int numIter = Integer.parseInt(args[2]);
 
 		for(double q = 0; q < 1; q+=0.01) {
 			CAModel model = new CAModel(width,height,q,growth,firechance);
-			run(model, numIter);
+			run(model);
 		}
 	}
 
