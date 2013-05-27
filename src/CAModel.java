@@ -184,8 +184,17 @@ public class CAModel {
 		int width = lattice.length;
 		int height = lattice[0].length;
 		for(int[] v : dirs) {
-			if(i + v[0] > 0 && i + v[0] < width && j + v[1] > 0 && j + v[1] < height)
-				a.add(lattice[i + v[0]][j + v[1]]);
+			int x = i + v[0];
+			int y = j + v[1];
+			if(i + v[0] < 0)
+				x = width + v[0];
+			if(j + v[1] < 0)
+				y = height + v[1];
+			if(i + v[0] >= width)
+				x = v[0] - 1;
+			if(j + v[1] >= height)
+				y = v[1] - 1;
+			a.add(lattice[x][y]);
 		}
 		return a;
 	}
