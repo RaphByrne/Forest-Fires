@@ -110,18 +110,24 @@ public class CAModel {
 				} else if(lattice[i][j] == TREE){ //TREE -> FIRE if at least one fire in neighbourhood or randomly
 					//here I'm assuming Moore neighbourhoods
 					boolean onfire = false;
+					//checks neighbourhood; if a tree is on fire this tree catches fire
 					for(Integer x : getNeighbourhood(lattice, i , j, moore)) {
 						if(x == ONFIRE)
 							onfire = true;
 					}
+					//if this tree is hit by lightning, it catches fire
 					if(rand.nextDouble() < lighteningChance)
 						onfire = true;
+					
+					//update next lattice if it is on fire
 					if(onfire) {
 						nextLattice[i][j] = ONFIRE;
 						numFires++;
 						numTrees--;
-					} else
+						//otherwise it stays a tree
+					} else {
 						nextLattice[i][j] = TREE;
+					}
 				} else if(lattice[i][j] == EMPTY) { //EMPTY -> TREE with probability p
 					if(rand.nextDouble() < growthrate) {
 						nextLattice[i][j] = TREE;
