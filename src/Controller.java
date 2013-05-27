@@ -141,7 +141,7 @@ public class Controller extends JFrame implements ActionListener{
 		"set size ratio 1",
 		"set cbrange [0:3]",
 		"set palette model RGB defined (0 'black', 0.99 'black', 1 'green', 1.99 'green', 2 'red', 2.99 'red')",
-		"set cbtics (\"empty\" 0, \"tree\" 1, \"fire\" 2) offset 0 2",
+		"set cbtics ('empty' 0, 'tree' 1, 'fire' 2) offset 0 2",
 		"set key at graph 1,1 bottom Right reverse",
 		"set xtics out -200,10,200",
 		"set ytics out -200,10,200",
