@@ -14,6 +14,7 @@ public class CAModel {
 	double q = 0;
 	double growthrate;
 	double lighteningChance;
+	double burnResist=-1;
 	private final int[][] moore = {{0,0},{0,1},{1,1},{1,0},{0,-1},{-1,-1},{-1,0},{1,-1},{-1,1}};
 	int numTrees = 0;
 	int numFires = 0;
@@ -76,7 +77,34 @@ public class CAModel {
 		numEmpty = width*height - numTrees;
 	}
 		
-		
+	/**
+	 * Makes a new model to the spec of the assignment, with tree 'resistance to burning'
+	 * @param width the width of the lattice
+	 * @param height the hieght of the lattice
+	 * @param q the probably that a cell will intially contain a tree
+	 * @param growthrate the probably that a new tree will grow in an empty cell
+	 * @param lighteningChance probably of a tree catching fire
+	 */
+	public CAModel(int width, int height, double q, double growthrate, double lighteningChance, double burnResist) {
+		this.width = width;
+		this.height = height;
+		this.growthrate = growthrate;
+		this.lighteningChance = lighteningChance;
+		this.q = q;
+		this.burnResist = burnResist;
+		lattice = new int[width][height];
+		long seed = System.currentTimeMillis();
+		Random rand = new Random(seed);
+		for(int i = 0; i < width; i++)
+			for(int j = 0; j < width; j++)
+				if(rand.nextDouble() < q) {
+					lattice[i][j] = TREE;
+					numTrees++;
+				}
+				else
+					lattice[i][j] = EMPTY;
+		numEmpty = width*height - numTrees;
+	}	
 
 	/**
  	* Makes a model from an existing lattice
@@ -104,16 +132,20 @@ public class CAModel {
 		int[][] nextLattice = new int[width][height];
 		for(int i = 0; i < width; i++)
 			for(int j = 0; j < height; j++) {
-				if(lattice[i][j] == ONFIRE) { //FIRE -> EMPTY
+				if(lattice[i][j] == ONFIRE) { //FIRE -> EMPTY	
 					nextLattice[i][j] = EMPTY;
-					numFires--;
+					numFires--;	
+					
 				} else if(lattice[i][j] == TREE){ //TREE -> FIRE if at least one fire in neighbourhood or randomly
 					//here I'm assuming Moore neighbourhoods
 					boolean onfire = false;
 					//checks neighbourhood; if a tree is on fire this tree catches fire
 					for(Integer x : getNeighbourhood(lattice, i , j, moore)) {
-						if(x == ONFIRE)
-							onfire = true;
+						if(x == ONFIRE) {
+							if (rand.nextDouble() > burnResist) {
+								onfire = true;
+							}
+						}
 					}
 					//if this tree is hit by lightning, it catches fire
 					if(rand.nextDouble() < lighteningChance)
@@ -128,6 +160,7 @@ public class CAModel {
 					} else {
 						nextLattice[i][j] = TREE;
 					}
+					
 				} else if(lattice[i][j] == EMPTY) { //EMPTY -> TREE with probability p
 					if(rand.nextDouble() < growthrate) {
 						nextLattice[i][j] = TREE;
