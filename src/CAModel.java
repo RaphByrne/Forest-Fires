@@ -15,7 +15,9 @@ public class CAModel {
 	double growthrate;
 	double lighteningChance;
 	double burnResist=-1;
+	double[] windMap = {1,1,1,1,1,1,1,1,1}; //this is the default for moore neighbourhoods
 	private final int[][] moore = {{0,0},{0,1},{1,1},{1,0},{0,-1},{-1,-1},{-1,0},{1,-1},{-1,1}};
+	private final int[][] vonNeumann = {{0,0},{0,1},{1,0},{-1,0},{0,-1}};
 	int numTrees = 0;
 	int numFires = 0;
 	int numEmpty = 0;
@@ -63,6 +65,7 @@ public class CAModel {
 		this.growthrate = growthrate;
 		this.lighteningChance = lighteningChance;
 		this.q = q;
+
 		lattice = new int[width][height];
 		long seed = System.currentTimeMillis();
 		Random rand = new Random(seed);
@@ -86,25 +89,35 @@ public class CAModel {
 	 * @param lighteningChance probably of a tree catching fire
 	 */
 	public CAModel(int width, int height, double q, double growthrate, double lighteningChance, double burnResist) {
-		this.width = width;
-		this.height = height;
-		this.growthrate = growthrate;
-		this.lighteningChance = lighteningChance;
-		this.q = q;
+		this(width,height,q,growthrate,lighteningChance);
 		this.burnResist = burnResist;
-		lattice = new int[width][height];
-		long seed = System.currentTimeMillis();
-		Random rand = new Random(seed);
-		for(int i = 0; i < width; i++)
-			for(int j = 0; j < width; j++)
-				if(rand.nextDouble() < q) {
-					lattice[i][j] = TREE;
-					numTrees++;
-				}
-				else
-					lattice[i][j] = EMPTY;
-		numEmpty = width*height - numTrees;
 	}	
+	
+	/**
+	 * Makes a new model to the spec of the assignment, with wind
+	 * @param width the width of the lattice
+	 * @param height the hieght of the lattice
+	 * @param q the probably that a cell will intially contain a tree
+	 * @param growthrate the probably that a new tree will grow in an empty cell
+	 * @param lighteningChance probably of a tree catching fire
+	 */
+	public CAModel(int width, int height, double q, double growthrate, double lighteningChance, double burnResist, int windY, int windX, double windStr) {
+		this(width,height,q,growthrate,lighteningChance, burnResist);
+		windMap = getWindMap(moore,windX,windY,windStr);
+	}	
+	
+	public static double[] getWindMap(int[][] dirs, int windX, int windY, double strength) {
+		double[] map = new double[dirs.length];
+		windX = -windX;
+		windY = -windY;
+		for(int i = 0; i < dirs.length; i++) {
+			int[] v = dirs[i];
+			int x = v[0]*windX + v[1]*windY;
+			double c = (1.0/(Math.pow(2,2-x)))*strength;
+			map[i] = c;
+		}
+		return map;
+	}
 
 	/**
  	* Makes a model from an existing lattice
@@ -140,9 +153,10 @@ public class CAModel {
 					//here I'm assuming Moore neighbourhoods
 					boolean onfire = false;
 					//checks neighbourhood; if a tree is on fire this tree catches fire
-					for(Integer x : getNeighbourhood(lattice, i , j, moore)) {
-						if(x == ONFIRE) {
-							if (rand.nextDouble() > burnResist) {
+					int[] neighbourhood = getNeighbourhood(lattice, i , j, moore);
+					for(int n = 0; n < neighbourhood.length; n++) {
+						if(neighbourhood[n] == ONFIRE) {
+							if (rand.nextDouble() < windMap[n] && rand.nextDouble() > burnResist) {
 								onfire = true;
 							}
 						}
@@ -179,11 +193,12 @@ public class CAModel {
 	 * @param dirs
 	 * @return
 	 */
-	public static ArrayList<Integer> getNeighbourhood(int[][] lattice, int i, int j, int[][] dirs) {
-		ArrayList<Integer> a = new ArrayList<Integer>();
+	public static int[] getNeighbourhood(int[][] lattice, int i, int j, int[][] dirs) {
+		int[] a = new int[dirs.length];
 		int width = lattice.length;
 		int height = lattice[0].length;
-		for(int[] v : dirs) {
+		for(int z = 0; z < dirs.length; z++) {
+			int[] v = dirs[z];
 			int x = i + v[0];
 			int y = j + v[1];
 			if(i + v[0] < 0)
@@ -194,11 +209,12 @@ public class CAModel {
 				x = v[0] - 1;
 			if(j + v[1] >= height)
 				y = v[1] - 1;
-			a.add(lattice[x][y]);
+			a[z] = lattice[x][y];
 		}
 		return a;
 	}
-	
+
+		
 	/**
  	* Makes a random change to the lattice, mostly used in initial development to
  	* generate random models

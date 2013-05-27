@@ -156,7 +156,10 @@ public class Controller extends JFrame implements ActionListener{
 	}
 
 	public static void main(String[] args) {
-		CAModel model = new CAModel(200,200,0.05, 0.3, 0.00006);//new CAModel(100,100,0.05, 0.003, 0.00006, 0.20); // new CAModel(100, 100, 0.08, 0.005, 0.000000001, 0.3); 
+		//CAModel model = new CAModel(200,200,0.05, 0.3, 0.00006);
+		//CAModel model = new CAModel(100,100,0.05, 0.003, 0.00006, 0.20); 
+		//CAModel model =  new CAModel(100, 100, 0.08, 0.005, 0.000000001, 0.3); 
+		CAModel model = new CAModel(100,100,0.05, 0.3, 0.00006, 0, -1, 0, 1); 
 		Controller c = new Controller(model);
 		initGnuplot();
 		printLattice(model.lattice);
