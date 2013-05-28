@@ -77,13 +77,13 @@ public class Controller extends JFrame implements ActionListener{
 			stopButton.setEnabled(false);
 			stepButton.setEnabled(true);
 			plotter.cancel(true);
-			plotter = new PlotTask(new CAModel(plotter.model.lattice, plotter.model.growthrate, plotter.model.lighteningChance));
+			plotter = new PlotTask(plotter.model.clone());
 		} else if(e.getActionCommand() == "RESET") {
 			playButton.setEnabled(true);
 			stopButton.setEnabled(false);
 			stepButton.setEnabled(true);
 			plotter.cancel(true);
-			plotter = new PlotTask(new CAModel(originalModel.lattice, originalModel.growthrate, originalModel.lighteningChance));
+			plotter = new PlotTask(originalModel.clone());
 			printLattice(plotter.model.lattice);
 		} else if(e.getActionCommand() == "STEP") {
 			plotter.model.step();
@@ -159,7 +159,7 @@ public class Controller extends JFrame implements ActionListener{
 		//CAModel model = new CAModel(200,200,0.05, 0.3, 0.00006);
 		//CAModel model = new CAModel(100,100,0.05, 0.003, 0.00006, 0.20); 
 		//CAModel model =  new CAModel(100, 100, 0.08, 0.005, 0.000000001, 0.3); 
-		CAModel model = new CAModel(100,100,0.05, 0.3, 0.00006, 0, -1, 0, 1); 
+		CAModel model = new CAModel(100,100,0.05, 0.3, 0.00006, 0, -0.6, 0.6); 
 		Controller c = new Controller(model);
 		initGnuplot();
 		printLattice(model.lattice);

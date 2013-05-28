@@ -15,42 +15,49 @@ public class CAModel {
 	double growthrate;
 	double lighteningChance;
 	double burnResist=-1;
-	double[] windMap = {1,1,1,1,1,1,1,1,1}; //this is the default for moore neighbourhoods
+	double windX = 0;
+	double windY = 0;
+	static double[][] defWindMap = {{1,1},{1,1},{1,1},{1,1},{1,1},{1,1},{1,1},{1,1},{1,1}};
+	double[][] windMap = {{1,1},{1,1},{1,1},{1,1},{1,1},{1,1},{1,1},{1,1},{1,1}}; //this is the default for moore neighbourhoods
 	private final int[][] moore = {{0,0},{0,1},{1,1},{1,0},{0,-1},{-1,-1},{-1,0},{1,-1},{-1,1}};
 	private final int[][] vonNeumann = {{0,0},{0,1},{1,0},{-1,0},{0,-1}};
 	int numTrees = 0;
 	int numFires = 0;
 	int numEmpty = 0;
-	
-	/**
-	 * Makes makes an initial random configuration
-	 * @param width
-	 * @param height
-	 * @param numtrees
-	 */
-	public CAModel(int width, int height, int numtrees, double growthrate) {
-		this.width = width;
-		this.height = height;
-		this.growthrate = growthrate;
-		this.lighteningChance = 0;
-		lattice = new int[width][height];
-		for(int i = 0; i < width; i++)
-			for(int j = 0; j < width; j++)
-				lattice[i][j] = EMPTY;
 		
+	public int[][] genNewLattice(int width, int height, double q) {	
+		lattice = new int[width][height];
 		long seed = System.currentTimeMillis();
 		Random rand = new Random(seed);
-		for(int i = 0; i < numtrees; i++) {
-			int x = rand.nextInt(width);
-			int y = rand.nextInt(height);
-			if(lattice[x][y] != TREE) {
-				lattice[x][y] = TREE;
-			}
-		}
-		numTrees = numtrees;
-		numEmpty = width*height - numTrees;
+		for(int i = 0; i < width; i++)
+			for(int j = 0; j < width; j++)
+				if(rand.nextDouble() < q) {
+					lattice[i][j] = TREE;
+				} else
+					lattice[i][j] = EMPTY;
+		return lattice;
 	}
-	
+
+	public int getNumTrees(int[][] lattice) {
+		int trees = 0;
+		for(int[] l : lattice) {
+			for(int i : l)
+				if(i == TREE)
+					trees++;
+		}
+		return trees;
+	}
+
+	public int getNumFires(int[][] lattice) {
+		int fires = 0;
+		for(int[] l : lattice) {
+			for(int i : l)
+				if(i == ONFIRE)
+					fires++;
+		}
+		return fires;
+	}
+
 	/**
 	 * Makes a new model to the spec of the assignment
 	 * @param width the width of the lattice
@@ -65,18 +72,8 @@ public class CAModel {
 		this.growthrate = growthrate;
 		this.lighteningChance = lighteningChance;
 		this.q = q;
-
-		lattice = new int[width][height];
-		long seed = System.currentTimeMillis();
-		Random rand = new Random(seed);
-		for(int i = 0; i < width; i++)
-			for(int j = 0; j < width; j++)
-				if(rand.nextDouble() < q) {
-					lattice[i][j] = TREE;
-					numTrees++;
-				}
-				else
-					lattice[i][j] = EMPTY;
+		lattice = genNewLattice(width,height,q);
+		numTrees = getNumTrees(lattice);
 		numEmpty = width*height - numTrees;
 	}
 		
@@ -101,40 +98,51 @@ public class CAModel {
 	 * @param growthrate the probably that a new tree will grow in an empty cell
 	 * @param lighteningChance probably of a tree catching fire
 	 */
-	public CAModel(int width, int height, double q, double growthrate, double lighteningChance, double burnResist, int windY, int windX, double windStr) {
+	public CAModel(int width, int height, double q, double growthrate, double lighteningChance, double burnResist, double windX, double windY) {
 		this(width,height,q,growthrate,lighteningChance, burnResist);
-		windMap = getWindMap(moore,windX,windY,windStr);
+		this.windX = windX;
+		this.windY = windY;
+		windMap = getWindMap(moore,windY,windX); //these are reversed because arrays
+	}
+	
+	//consructor for using an existing model
+	public CAModel(CAModel model) {
+		this.width = model.width;
+		this.height = model.height;
+		this.lattice = latticeClone(model.lattice);
+		this.q = model.q;
+		this.growthrate = model.growthrate;
+		this.lighteningChance = model.lighteningChance;
+		this.burnResist = model.burnResist;
+		this.windX = model.windX;
+		this.windY = model.windY;
+		windMap = model.windMap; 
+		numTrees = model.numTrees;
+		numFires = model.numFires;
+		numEmpty = model.numEmpty;
 	}	
 	
-	public static double[] getWindMap(int[][] dirs, int windX, int windY, double strength) {
-		double[] map = new double[dirs.length];
-		windX = -windX;
-		windY = -windY;
+	public static double[][] getWindMap(int[][] dirs, double windX, double windY) {
+		if(windX == 0 && windY == 0)
+			return defWindMap; //if they've turned wind off just return the default	
+		double[][] map = new double[dirs.length][2];
 		for(int i = 0; i < dirs.length; i++) {
 			int[] v = dirs[i];
-			int x = v[0]*windX + v[1]*windY;
-			double c = (1.0/(Math.pow(2,2-x)))*strength;
-			map[i] = c;
+			double x = (double)v[0];
+			double y = (double)v[1];
+			double[] m = new double[2];
+			if(x*windX <= 0) //if they have opposite signs or 0
+				m[0] = Math.abs(x*windX); //multiply
+			else
+				m[0] = Math.abs(windX/4); //otherwise it's the wrong way so less strong
+			if(y*windY <= 0)
+				m[1] = Math.abs(y*windY);
+			else
+				m[1] = Math.abs(windY/4);
+			map[i] = m;
 		}
 		return map;
 	}
-
-	/**
- 	* Makes a model from an existing lattice
- 	*
- 	* @param lattice the lattice, a full clone is made
- 	* @param growthrate
- 	* @param lighteningChance
- 	*
- 	*/ 	
-	public CAModel(int[][] lattice, double growthrate, double lighteningChance) {
-		this.lattice = latticeClone(lattice);
-		this.width = lattice.length;
-		this.height = lattice[0].length;
-		this.growthrate = growthrate;
-		this.lighteningChance = lighteningChance;
-	}
-
 
 	/**
  	* Performs one iteration of the model
@@ -156,9 +164,10 @@ public class CAModel {
 					int[] neighbourhood = getNeighbourhood(lattice, i , j, moore);
 					for(int n = 0; n < neighbourhood.length; n++) {
 						if(neighbourhood[n] == ONFIRE) {
-							if (rand.nextDouble() < windMap[n] && rand.nextDouble() > burnResist) {
-								onfire = true;
-							}
+							if(rand.nextDouble() < windMap[n][0] || rand.nextDouble() < windMap[n][1])
+								if (rand.nextDouble() > burnResist) {
+									onfire = true;
+								}
 						}
 					}
 					//if this tree is hit by lightning, it catches fire
@@ -287,7 +296,7 @@ public class CAModel {
  	* Does a full clone of an existing model
  	*/ 
 	public CAModel clone() {
-		return new CAModel(lattice, growthrate, lighteningChance);
+		return new CAModel(this);
 	}
 	
 	/**
