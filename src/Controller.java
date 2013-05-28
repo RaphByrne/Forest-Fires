@@ -156,10 +156,33 @@ public class Controller extends JFrame implements ActionListener{
 	}
 
 	public static void main(String[] args) {
-		//CAModel model = new CAModel(200,200,0.05, 0.3, 0.00006);
-		//CAModel model = new CAModel(100,100,0.05, 0.003, 0.00006, 0.20); 
-		//CAModel model =  new CAModel(100, 100, 0.08, 0.005, 0.000000001, 0.3); 
-		CAModel model = new CAModel(100,100,0.05, 0.3, 0.00006, 0, -0.6, 0.6); 
+		if(args.length < 5) {
+			System.err.println("Arguments are: width height initTreeChance growthRate igniteChance");
+			System.err.println("Extensions are: <default args> burnResist windX windY");
+			System.exit(0);
+		}
+		if(args.length > 8) {
+			System.err.println("Extensions are: <default args> burnResist windX windY");
+			System.exit(0);
+		}
+		
+		//could do some more argument checking here but I can't be bothered	
+		int width = Integer.parseInt(args[0]);
+		int height = Integer.parseInt(args[1]);
+		double q = Double.parseDouble(args[2]);
+		double growthRate = Double.parseDouble(args[3]);
+		double igniteChance = Double.parseDouble(args[4]);
+		double burnResist = -1;
+		double windX = 0;
+		double windY = 0;
+		if(args.length >= 6)
+			burnResist = Double.parseDouble(args[5]);
+		if(args.length == 8) {
+			windX = Double.parseDouble(args[6]);
+			windY = Double.parseDouble(args[7]);
+		}
+			
+		CAModel model = new CAModel(width,height,q, growthRate, igniteChance, burnResist, windX, windY); 
 		Controller c = new Controller(model);
 		initGnuplot();
 		printLattice(model.lattice);
