@@ -94,7 +94,7 @@ public class Controller extends JFrame implements ActionListener{
 
 	private void saveSnapshot(CAModel model) {
 		System.out.println("set t png");
-		System.out.println("set output '| display -write model" + model.width + "," + model.height + "," + model.growthrate + "," + model.lighteningChance + "," + model.tics + ".png'");
+		System.out.println("set output '| display -write model" + model.width + "," + model.height + "," + model.growthrate + "," + model.lighteningChance + "," + model.tics + "," + System.currentTimeMillis() + ".png'");
 		printLattice(model.lattice);
 		System.out.println("set t x11");
 		System.out.println("set output 'STDOUT'");
