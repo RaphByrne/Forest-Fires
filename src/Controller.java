@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.JButton;
+import javax.swing.JTextField;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
@@ -11,7 +12,8 @@ public class Controller extends JFrame implements ActionListener{
 
 	static boolean doPlay = false;
 	private JButton playButton, stopButton, resetButton, stepButton, randFireButton,
-	centreFireButton;
+	centreFireButton, saveButton, circleFireButton, lineFireButton;
+	private JTextField x1Text, y1Text, x2Text, y2Text, rText;
 	private PlotTask plotter;
 	private CAModel originalModel;
 	
@@ -33,6 +35,16 @@ public class Controller extends JFrame implements ActionListener{
 		stepButton = makeButton("STEP");
 		randFireButton = makeButton("RANDOM FIRE");
 		centreFireButton = makeButton("SET FIRE AT CENTRE");
+		saveButton = makeButton("SAVE SNAPSHOT");
+		circleFireButton = makeButton("CIRCLE FIRE");
+		lineFireButton = makeButton("LINE FIRE");
+	
+		x1Text = new JTextField("y1-coord", 10);
+		y1Text = new JTextField("x1-coord", 10);
+		x2Text = new JTextField("y2-coord", 10);
+		y2Text = new JTextField("x2-coord", 10);
+		rText = new JTextField("radius", 10);
+		
 		
 		//put everything in a panel
 		JPanel commandPanel = new JPanel();
@@ -40,11 +52,29 @@ public class Controller extends JFrame implements ActionListener{
 		commandPanel.add(stopButton);
 		commandPanel.add(resetButton);
 		commandPanel.add(stepButton);
-		commandPanel.add(randFireButton);
-		commandPanel.add(centreFireButton);
-		
+		commandPanel.add(saveButton);	
+
+
+		JPanel modifierPanel = new JPanel();
+		modifierPanel.add(randFireButton);
+		modifierPanel.add(centreFireButton);
+
+		JPanel textPanel = new JPanel();
+		textPanel.add(y1Text);
+		textPanel.add(x1Text);
+		textPanel.add(y2Text);
+		textPanel.add(x2Text);
+		textPanel.add(rText);
+
+		JPanel shapesPanel = new JPanel();
+		shapesPanel.add(circleFireButton);
+		shapesPanel.add(lineFireButton);
+	
 		//more swing BS
-		getContentPane().add(commandPanel);
+		getContentPane().add(commandPanel, BorderLayout.PAGE_START);
+		getContentPane().add(modifierPanel, BorderLayout.LINE_START);
+		getContentPane().add(textPanel, BorderLayout.CENTER);
+		getContentPane().add(shapesPanel, BorderLayout.LINE_END);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 		pack();
@@ -60,6 +90,14 @@ public class Controller extends JFrame implements ActionListener{
 		button.addActionListener(this); //makes actionPerformed work
 		//getContentPane().add(button);
 		return button;
+	}
+
+	private void saveSnapshot(CAModel model) {
+		System.out.println("set t png");
+		System.out.println("set output '| display -write model" + model.width + "," + model.height + "," + model.growthrate + "," + model.lighteningChance + "," + model.tics + ".png'");
+		printLattice(model.lattice);
+		System.out.println("set t x11");
+		System.out.println("set output 'STDOUT'");
 	}
 
 	/**
@@ -89,11 +127,34 @@ public class Controller extends JFrame implements ActionListener{
 			plotter.model.step();
 			printLattice(plotter.model.lattice);
 		} else if(e.getActionCommand() == "RANDOM FIRE") {
+			if(!plotter.isCancelled())
+				plotter.cancel(true);
 			plotter.model.setRandomFire();
 			printLattice(plotter.model.lattice);
+			plotter = new PlotTask(plotter.model.clone());	
 		} else if(e.getActionCommand() == "SET FIRE AT CENTRE") {
+			if(!plotter.isCancelled())
+				plotter.cancel(true);
 			plotter.model.setFireCentre();
 			printLattice(plotter.model.lattice);
+			plotter = new PlotTask(plotter.model.clone());	
+		} else if(e.getActionCommand() == "SAVE SNAPSHOT") {
+			if(!plotter.isCancelled())
+				plotter.cancel(true);
+			saveSnapshot(plotter.model);
+			plotter = new PlotTask(plotter.model.clone());	
+		} else if(e.getActionCommand() == "CIRCLE FIRE") {
+			if(!plotter.isCancelled())
+				plotter.cancel(true);
+			plotter.model.setFireCircle(Double.parseDouble(rText.getText()),Integer.parseInt(x1Text.getText()),Integer.parseInt(y1Text.getText()));
+			printLattice(plotter.model.lattice);
+			plotter = new PlotTask(plotter.model.clone());	
+		} else if(e.getActionCommand() == "LINE FIRE") {
+			if(!plotter.isCancelled())
+				plotter.cancel(true);
+			plotter.model.setFireLine(Integer.parseInt(x1Text.getText()),Integer.parseInt(y1Text.getText()),Integer.parseInt(x2Text.getText()),Integer.parseInt(y2Text.getText()));
+			printLattice(plotter.model.lattice);
+			plotter = new PlotTask(plotter.model.clone());	
 		}
 	}
 	
@@ -140,7 +201,7 @@ public class Controller extends JFrame implements ActionListener{
 		"set term x11 size 1000,800",
 		"set size ratio 1",
 		"set cbrange [0:3]",
-		"set palette model RGB defined (0 'black', 0.99 'black', 1 'green', 1.99 'green', 2 'red', 2.99 'red')",
+		"set palette model RGB defined (0 'black', 0.99 'black', 1 'green', 1.80 'green', 2 '#FF0000', 2.99 '#FF0000')",
 		"set cbtics ('empty' 0, 'tree' 1, 'fire' 2) offset 0 2",
 		"set key at graph 1,1 bottom Right reverse",
 		"set xtics out -200,10,200",

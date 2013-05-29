@@ -24,6 +24,7 @@ public class CAModel {
 	int numTrees = 0;
 	int numFires = 0;
 	int numEmpty = 0;
+	int tics = 0;
 		
 	public int[][] genNewLattice(int width, int height, double q) {	
 		lattice = new int[width][height];
@@ -116,6 +117,7 @@ public class CAModel {
 		this.burnResist = model.burnResist;
 		this.windX = model.windX;
 		this.windY = model.windY;
+		this.tics = model.tics;
 		windMap = model.windMap; 
 		numTrees = model.numTrees;
 		numFires = model.numFires;
@@ -134,11 +136,11 @@ public class CAModel {
 			if(x*windX <= 0) //if they have opposite signs or 0
 				m[0] = Math.abs(x*windX); //multiply
 			else
-				m[0] = Math.abs(windX/4); //otherwise it's the wrong way so less strong
+				m[0] = Math.abs(1/windX); //otherwise it's the wrong way so less strong
 			if(y*windY <= 0)
 				m[1] = Math.abs(y*windY);
 			else
-				m[1] = Math.abs(windY/4);
+				m[1] = Math.abs(1/windY);
 			map[i] = m;
 		}
 		return map;
@@ -164,7 +166,7 @@ public class CAModel {
 					int[] neighbourhood = getNeighbourhood(lattice, i , j, moore);
 					for(int n = 0; n < neighbourhood.length; n++) {
 						if(neighbourhood[n] == ONFIRE) {
-							if(rand.nextDouble() < windMap[n][0] || rand.nextDouble() < windMap[n][1])
+							if(rand.nextDouble()*Math.abs(windX) < windMap[n][0] || rand.nextDouble()*Math.abs(windY) < windMap[n][1])
 								if (rand.nextDouble() > burnResist) {
 									onfire = true;
 								}
@@ -194,6 +196,7 @@ public class CAModel {
 			}
 		lattice = nextLattice;
 		numEmpty = width*height - numTrees - numFires;
+		tics++;
 	}
 	
 	/**
@@ -277,7 +280,7 @@ public class CAModel {
 	 * @param radius
 	 * @param centre
 	 */
-	public void setFireCircle(int radius, int x, int y) {
+	public void setFireCircle(double radius, int x, int y) {
 		for(int i = 0; i < width; i++)
 			for(int j = 0; j < height; j++) {
 				if(Math.sqrt((i - x)*(i-x) + (j - y)*(j-y)) < radius)
@@ -285,6 +288,22 @@ public class CAModel {
 			}
 	}
 	
+	private boolean collinear(int x1, int y1, int x2, int y2, int x3, int y3) {
+		double tolerance = width/2;
+		double area = ((double)x1*((double)y2-y3) + (double)x2*((double)y3-y1) + (double)x3*((double)y1-y2));
+		return Math.abs(area) < tolerance;
+	}
+
+	public void setFireLine(int x1, int y1, int x2, int y2) {
+		setFire(x1,y1);
+		setFire(x2,y2);
+		for(int i = 0; i < width; i++)
+			for(int j = 0; j < height; j++) {
+				if (collinear(x1,y1,x2,y2,i,j))
+					setFire(i,j);
+			}
+	}
+
 	/**
  	* Sets fire to a small circle in the middle of the lattice
  	*/ 
