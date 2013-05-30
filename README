@@ -1,11 +1,43 @@
 Simulates forest fires with cellular automata
 
-main java file is Controller.java
+THIS PROJECT ONLY OPERATES UNDER LINUX
+
+There are two main files: Controller and CAModel
+
+Controller runs a small gui to control the model
+CAModel runs all of the model calculations.
+
+The project can be compiled with the supplied ant build file by invoking
+
+ant
+
+
 
 you will need gnuplot installed
 
-run with:
+To see a list of possible arguments run: java Controller
 
-java Controller | gnuplot -persist
+The program is run with run with:
 
-you can control with the buttons that come up in a little java window
+java Controller <lattice-width> <lattice-height> <q> <p> <f> [<burn-resistance> <wind-x> <wind-y>] | gnuplot -persist
+
+Where arguments inside the [] are optional model extensions. However all must be included if you wish to use any of them.
+
+Defaults for extensions:
+burn-resist: -1
+wind-x: 0
+wind-y: 0
+
+These values will cause the model to run as if the extensions are not present.
+
+
+When you run the Controller you should be presented with a small GUI with buttons to control the model interactively.
+
+The basic functions of the Controller are: play, stop, step, reset and save snapshot
+Which behave as you would expect them to. The saving function saves a .png image of the current model using the 'display' program
+
+Also included are functions that start fires:
+Random fire - ignites a single random tree
+Set fire at centre - ignites a small circle of trees in the centre of the lattice
+Circle fire - uses the text boxes to define the centre and radius of a circle to ignite (uses only the first two co-ord boxes)
+Line fire - allows you to define two points using the text boxes and ignites a line of trees that passes through both those points

@@ -12,8 +12,8 @@ public class CAModel {
 	int[][] lattice;
 	int width, height;
 	double q = 0;
-	double growthrate;
-	double lighteningChance;
+	double growthrate; //aka p
+	double lighteningChance; //aka f
 	double burnResist=-1;
 	double windX = 0;
 	double windY = 0;
@@ -123,7 +123,11 @@ public class CAModel {
 		numFires = model.numFires;
 		numEmpty = model.numEmpty;
 	}	
-	
+
+	/**
+ 	* Generates a wind map for use in fire propagation with wind. Takes a neighbourhood and x and y wind strengths.
+ 	* Wind strength should be at least 1
+ 	*/	
 	public static double[][] getWindMap(int[][] dirs, double windX, double windY) {
 		if(windX == 0 && windY == 0)
 			return defWindMap; //if they've turned wind off just return the default	
