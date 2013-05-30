@@ -298,12 +298,16 @@ public class CAModel {
 		return Math.abs(area) < tolerance;
 	}
 
+	private boolean insideBox(int x1, int y1, int x2, int y2, int x3, int y3) {
+		return (x3 >= x1 && x3 <= x2) && (y3 >= y1 && y3 <= y2);
+	}
+
 	public void setFireLine(int x1, int y1, int x2, int y2) {
 		setFire(x1,y1);
 		setFire(x2,y2);
 		for(int i = 0; i < width; i++)
 			for(int j = 0; j < height; j++) {
-				if (collinear(x1,y1,x2,y2,i,j))
+				if (collinear(x1,y1,x2,y2,i,j) && insideBox(x1,y1,x2,y2,i,j))
 					setFire(i,j);
 			}
 	}

@@ -40,4 +40,4 @@ Also included are functions that start fires:
 Random fire - ignites a single random tree
 Set fire at centre - ignites a small circle of trees in the centre of the lattice
 Circle fire - uses the text boxes to define the centre and radius of a circle to ignite (uses only the first two co-ord boxes)
-Line fire - allows you to define two points using the text boxes and ignites a line of trees that passes through both those points
+Line fire - allows you to define two points using the text boxes and ignites a line of trees between those points
